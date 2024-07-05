@@ -1,5 +1,6 @@
 import QRCode from 'qrcode.react';
 import { useRef } from 'react';
+import { Button } from './ui/button';
 export default function QRGenerator({ value }) {
   const qrRef = useRef(null);
 
@@ -13,16 +14,16 @@ export default function QRGenerator({ value }) {
   };
 
   return (
-    <>
-      <div className='qr-code' ref={qrRef}>
+    <div className='flex items-center flex-col gap-4'>
+      <div className='qr-code ' ref={qrRef}>
         <QRCode
           value={JSON.stringify(value)}
-          className='border border-black p-2'
+          className='border border-black p-2.5 rounded-2xl'
         />
       </div>
-      <button className='btn' onClick={handleDownload}>
+      <Button className='btn' onClick={handleDownload}>
         Download QR Code
-      </button>
-    </>
+      </Button>
+    </div>
   );
 }

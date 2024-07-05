@@ -1,16 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { QRReader } from '../components/QRReader';
 import QrScanner from 'qr-scanner';
-import { getSeller } from '../requests';
+import { getProduct, getSeller } from '../requests';
 import { useUser } from '../context/hooks';
 const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 import contractJson from '../data/App.json';
 import { ethers } from 'ethers';
+import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 export default function AddSeller() {
   const [showReader, setShowReader] = useState(false);
   const [qrResult, setQrResult] = useState(null);
   const [sellerWalletAddress, setSellerWalletAddress] = useState('');
+  const [product, setProduct] = useState(null);
   const { user } = useUser();
+  const { toast } = useToast();
   const handleFileChange = async event => {
     const file = event.target.files[0];
     if (!file) return;
@@ -35,25 +43,85 @@ export default function AddSeller() {
     );
     const tx = await contract.addSeller(qrResult, data.id);
     await tx.wait();
+    setSellerWalletAddress('');
+    setProduct(null);
+    handleClearFile();
+    toast({ description: 'Seller added successfully!' });
   }
+  const fileInputRef = useRef(null);
+
+  const handleClearFile = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null;
+    }
+  };
+  useEffect(() => {
+    if (!qrResult) return;
+    (async () => {
+      const product = await getProduct(qrResult);
+      console.log(product);
+      setProduct(product);
+    })();
+  }, [qrResult]);
   return (
-    <div>
-      Seller
-      <button onClick={() => setShowReader(res => !res)}>Show Scanner</button>
-      <button>
-        <input type='file' accept='image/*' onChange={handleFileChange} />
-      </button>
+    <div className='max-w-[600px] mx-auto py-4 flex flex-col'>
+      <Label className='mb-4 block'>Add Product</Label>
+      <div className='grid grid-cols-2 gap-4 mb-6'>
+        <Button onClick={() => setShowReader(res => !res)}>
+          {showReader ? 'Stop Scanner' : 'Show Scanner'}
+        </Button>
+        <Input
+          id='picture'
+          ref={fileInputRef}
+          type='file'
+          accept='image/*'
+          className='cursor-pointer'
+          onChange={handleFileChange}
+        />
+      </div>
       <form onSubmit={handleForm}>
-        <input
+        <Label htmlFor='wallet-address' className='mb-4 block'>
+          Wallet Address
+        </Label>
+        <Input
+          id='wallet-address'
+          className='mb-4'
           type='text'
           value={sellerWalletAddress}
           onChange={e => setSellerWalletAddress(e.target.value)}
           placeholder='Wallet Address'
         />
-        <button>Add Seller</button>
+        <Button className='mb-6'>Add Seller</Button>
       </form>
-      {showReader && <QRReader setQrResult={setQrResult} />}
-      {qrResult}
+      <p className='mb-2'>{qrResult && 'Product selected'}</p>
+
+      {showReader && (
+        <QRReader
+          setQrResult={setQrResult}
+          setShowReader={setShowReader}
+          handleClearFile={handleClearFile}
+        />
+      )}
+      {product && (
+        <Card>
+          <CardHeader className='-mb-2'>
+            <CardTitle>Product Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='flex flex-col gap-2'>
+              <p>
+                <span className='font-medium'>Name</span>: {product.name}
+              </p>
+              <p>
+                <span className='font-medium'>Brand</span>: {product.brand}
+              </p>
+              <p>
+                <span className='font-medium'>Type</span>: {product.type}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

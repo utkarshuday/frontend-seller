@@ -10,7 +10,7 @@ export default function AuthLayout() {
   useEffect(() => {
     console.log(user);
     if (!user?.account) return navigate('/');
-    if (user?.data?.accountCreated) return navigate('/admin');
+    if (user?.data?.accountCreated) return navigate('/admin/add-product');
     if (user?.account && !user?.data?.accountCreated)
       return navigate('/create-seller');
   }, [user, navigate]);

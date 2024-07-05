@@ -4,16 +4,20 @@ export default function Admin() {
   return (
     <div>
       <nav>
-        <ul className='flex justify-center gap-4 bg-blue-200 py-3'>
+        <ul className='flex justify-center gap-4 bg-slate-900 text-slate-200 py-3'>
           <NavLink
             to='add-seller'
-            className={({ isActive }) => (isActive ? 'text-blue-600' : '')}
+            className={({ isActive }) =>
+              isActive ? 'underline underline-offset-8' : ''
+            }
           >
             <li>Add Seller</li>
           </NavLink>
           <NavLink
             to='add-product'
-            className={({ isActive }) => (isActive ? 'text-blue-600' : '')}
+            className={({ isActive }) =>
+              isActive ? 'underline underline-offset-8' : ''
+            }
           >
             <li>Add Product</li>
           </NavLink>

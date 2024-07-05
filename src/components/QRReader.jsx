@@ -2,7 +2,7 @@ import QrScanner from 'qr-scanner';
 import { useEffect, useRef } from 'react';
 import QrFrame from '../assets/qr-frame.svg';
 
-export function QRReader({ setQrResult }) {
+export function QRReader({ setQrResult, setShowReader, handleClearFile }) {
   const videoEl = useRef(null);
   const scanner = useRef(null);
   const qrBoxEl = useRef(null);
@@ -14,9 +14,9 @@ export function QRReader({ setQrResult }) {
         cur,
         result => {
           try {
-            console.log('hello');
-            if (result?.data) return;
             setQrResult(result?.data);
+            setShowReader(false);
+            handleClearFile();
           } catch {
             setQrResult(null);
           }
